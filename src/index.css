@@ -1,0 +1,39 @@
+@import url('https://fonts.googleapis.com/css2?family=Instrument+Sans:ital,wght@0,400..700;1,400..700&family=Newsreader:ital,opsz,wght@0,6..72,200..800;1,6..72,200..800&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Instrument Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-serif: "Newsreader", ui-serif, Georgia, serif;
+
+  /* Editorial / Organic Palette */
+  --color-paper: oklch(98% 0.005 80);
+  --color-paper-dim: oklch(95% 0.01 80);
+  --color-paper-dark: oklch(90% 0.01 80);
+  
+  --color-ink: oklch(25% 0.02 80);
+  --color-ink-light: oklch(45% 0.02 80);
+  --color-ink-faint: oklch(70% 0.01 80);
+
+  --color-accent-rust: oklch(50% 0.12 45);
+  --color-accent-rust-light: oklch(94% 0.03 45);
+  
+  --color-accent-sage: oklch(55% 0.08 150);
+  --color-accent-sage-light: oklch(95% 0.02 150);
+  
+  --color-accent-sky: oklch(60% 0.08 230);
+  --color-accent-sky-light: oklch(95% 0.02 230);
+}
+
+body {
+  background-color: var(--color-paper);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+@layer utilities {
+  .pb-safe {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+}
