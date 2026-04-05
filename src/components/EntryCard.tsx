@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { format } from 'date-fns';
 import { Entry } from '../types';
-import { Brain, Activity, Target, Plus, Trash2, Pin, Link as LinkIcon } from 'lucide-react';
+import { Brain, Activity, Target, Plus, Trash2, Pin, Link as LinkIcon, Sparkles } from 'lucide-react';
 import { CognitiveOverlay, InterventionOverlay, BehaviorOverlay } from './Overlays';
 import { cn } from '../lib/utils';
 import { useJournalStore } from '../store';
@@ -30,7 +30,7 @@ export function EntryCard({ entry }: EntryCardProps) {
   if (!hasCognitive && hasStrongEmotion) {
     suggestion = { type: 'cognitive' as const, label: 'Record Thought', icon: Brain, color: 'text-ink bg-paper-dark hover:bg-stone-200' };
   } else if (!hasIntervention && isLowMood) {
-    suggestion = { type: 'intervention' as const, label: 'Try Intervention', icon: Activity, color: 'text-accent-sky bg-accent-sky-light hover:bg-blue-100' };
+    suggestion = { type: 'intervention' as const, label: 'Try Technique', icon: Activity, color: 'text-accent-sky bg-accent-sky-light hover:bg-blue-100' };
   } else if (!hasBehavior && isLowMood) {
     suggestion = { type: 'behavior' as const, label: 'Plan Action', icon: Target, color: 'text-accent-sage bg-accent-sage-light hover:bg-emerald-100' };
   }
@@ -62,6 +62,12 @@ export function EntryCard({ entry }: EntryCardProps) {
               moodColors[entry.mood]
             )}>
               Mood: {entry.mood}/5
+            </div>
+          )}
+          {entry.isPositive && (
+            <div className="flex items-center gap-1.5 text-xs font-medium tracking-widest uppercase text-accent-sage-dark">
+              <Sparkles className="w-3.5 h-3.5" />
+              Win
             </div>
           )}
           {entry.isPinned && (
@@ -118,7 +124,7 @@ export function EntryCard({ entry }: EntryCardProps) {
         <div className="mb-6 pl-4 border-l-2 border-paper-dark cursor-pointer hover:border-ink-light transition-colors" onClick={() => setActiveOverlay('cognitive')}>
           <div className="flex items-center gap-2 mb-3 text-ink-light">
             <Brain className="w-3.5 h-3.5" />
-            <span className="text-xs font-medium uppercase tracking-widest">Cognitive Record</span>
+            <span className="text-xs font-medium uppercase tracking-widest">Thought Log</span>
           </div>
           <div className="space-y-3 font-serif text-lg text-ink">
             {entry.cognitive?.trigger && (
@@ -138,7 +144,7 @@ export function EntryCard({ entry }: EntryCardProps) {
         <div className="mb-6 pl-4 border-l-2 border-accent-sky-light cursor-pointer hover:border-accent-sky transition-colors" onClick={() => setActiveOverlay('intervention')}>
           <div className="flex items-center gap-2 mb-3 text-accent-sky">
             <Activity className="w-3.5 h-3.5" />
-            <span className="text-xs font-medium uppercase tracking-widest">Intervention</span>
+            <span className="text-xs font-medium uppercase tracking-widest">Calm-down Technique</span>
           </div>
           <div className="font-serif text-lg text-ink">
             Used <strong className="font-medium">{entry.intervention?.technique}</strong>. 
@@ -151,11 +157,16 @@ export function EntryCard({ entry }: EntryCardProps) {
         <div className="mb-6 pl-4 border-l-2 border-accent-sage-light cursor-pointer hover:border-accent-sage transition-colors" onClick={() => setActiveOverlay('behavior')}>
           <div className="flex items-center gap-2 mb-3 text-accent-sage">
             <Target className="w-3.5 h-3.5" />
-            <span className="text-xs font-medium uppercase tracking-widest">Behavioral Action</span>
+            <span className="text-xs font-medium uppercase tracking-widest">Action Plan</span>
           </div>
-          <div className="font-serif text-lg text-ink flex items-center justify-between">
+          <div className="font-serif text-lg text-ink flex flex-col sm:flex-row sm:items-center justify-between gap-2">
             <span>{entry.behavior?.action}</span>
-            <div className="flex items-center gap-4 font-sans">
+            <div className="flex flex-wrap items-center gap-4 font-sans">
+              {entry.behavior?.scheduledFor && !entry.behavior?.completed && (
+                <span className="text-accent-sage-dark text-xs uppercase tracking-widest font-medium">
+                  Scheduled: {format(new Date(entry.behavior.scheduledFor), 'MMM d, h:mm a')}
+                </span>
+              )}
               <span className={cn("text-xs font-medium uppercase tracking-widest", entry.behavior?.completed ? "text-accent-sage" : "text-ink-light")}>
                 {entry.behavior?.completed ? 'Completed' : 'Pending'}
               </span>
@@ -238,7 +249,7 @@ export function EntryCard({ entry }: EntryCardProps) {
                     onClick={() => { setActiveOverlay('cognitive'); setShowMenu(false); }}
                     className="w-full text-left px-4 py-3 text-sm font-medium uppercase tracking-widest text-ink hover:bg-paper-dim flex items-center gap-3"
                   >
-                    <Brain className="w-4 h-4 text-ink-light" /> Cognitive Record
+                    <Brain className="w-4 h-4 text-ink-light" /> Thought Log
                   </button>
                 )}
                 {!hasIntervention && (
@@ -246,7 +257,7 @@ export function EntryCard({ entry }: EntryCardProps) {
                     onClick={() => { setActiveOverlay('intervention'); setShowMenu(false); }}
                     className="w-full text-left px-4 py-3 text-sm font-medium uppercase tracking-widest text-ink hover:bg-paper-dim flex items-center gap-3"
                   >
-                    <Activity className="w-4 h-4 text-accent-sky" /> State Intervention
+                    <Activity className="w-4 h-4 text-accent-sky" /> Calm-down Technique
                   </button>
                 )}
                 {!hasBehavior && (
@@ -254,7 +265,7 @@ export function EntryCard({ entry }: EntryCardProps) {
                     onClick={() => { setActiveOverlay('behavior'); setShowMenu(false); }}
                     className="w-full text-left px-4 py-3 text-sm font-medium uppercase tracking-widest text-ink hover:bg-paper-dim flex items-center gap-3"
                   >
-                    <Target className="w-4 h-4 text-accent-sage" /> Behavioral Action
+                    <Target className="w-4 h-4 text-accent-sage" /> Action Plan
                   </button>
                 )}
                 {!entry.linkedEntryId && (

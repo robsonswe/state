@@ -23,7 +23,7 @@ export function Insights() {
     return isAfter(d, subDays(new Date(), 14)) && !isAfter(d, subDays(new Date(), 7));
   }), [entries]);
 
-  const stats = useMemo(() => {
+    const stats = useMemo(() => {
     const moodEntries = last7Days.filter(e => e.mood !== undefined);
     const avgMood = moodEntries.length > 0 
       ? (moodEntries.reduce((acc, e) => acc + (e.mood || 0), 0) / moodEntries.length).toFixed(1)
@@ -38,10 +38,10 @@ export function Insights() {
 
     const emotions = new Map<string, number>();
     const triggers = new Map<string, number>();
-    const techniqueEffectiveness = new Map<string, { count: number, totalShift: number }>();
+    const techniqueEffectiveness = new Map<string, { count: number, totalPercentShift: number }>();
     const valueAlignment = new Map<string, number>();
     
-    let interventionShift = 0;
+    let interventionPercentShift = 0;
     let interventionCount = 0;
     let behaviorCompleted = 0;
     let behaviorTotal = 0;
@@ -57,14 +57,16 @@ export function Insights() {
       }
       if (e.intervention?.stateBefore !== undefined && e.intervention?.stateAfter !== undefined) {
         const shift = e.intervention.stateBefore - e.intervention.stateAfter;
-        interventionShift += shift;
+        const percentShift = e.intervention.stateBefore > 0 ? (shift / e.intervention.stateBefore) * 100 : 0;
+        
+        interventionPercentShift += percentShift;
         interventionCount++;
         
         if (e.intervention.technique) {
-          const current = techniqueEffectiveness.get(e.intervention.technique) || { count: 0, totalShift: 0 };
+          const current = techniqueEffectiveness.get(e.intervention.technique) || { count: 0, totalPercentShift: 0 };
           techniqueEffectiveness.set(e.intervention.technique, {
             count: current.count + 1,
-            totalShift: current.totalShift + shift
+            totalPercentShift: current.totalPercentShift + percentShift
           });
         }
       }
@@ -81,24 +83,24 @@ export function Insights() {
 
     const topEmotions = Array.from(emotions.entries()).sort((a, b) => b[1] - a[1]).slice(0, 3);
     const topTriggers = Array.from(triggers.entries()).sort((a, b) => b[1] - a[1]).slice(0, 3);
-    const avgInterventionShift = interventionCount > 0 ? (interventionShift / interventionCount).toFixed(1) : null;
+    const avgInterventionPercentShift = interventionCount > 0 ? Math.round(interventionPercentShift / interventionCount) : null;
 
     // Find most effective technique
     let bestTechnique = null;
-    let maxAvgShift = -Infinity;
+    let maxAvgPercentShift = -Infinity;
     techniqueEffectiveness.forEach((data, technique) => {
       if (data.count >= 1) { // At least 1 use
-        const avgShift = data.totalShift / data.count;
-        if (avgShift > maxAvgShift) {
-          maxAvgShift = avgShift;
-          bestTechnique = { technique, avgShift: avgShift.toFixed(1), count: data.count };
+        const avgPercentShift = data.totalPercentShift / data.count;
+        if (avgPercentShift > maxAvgPercentShift) {
+          maxAvgPercentShift = avgPercentShift;
+          bestTechnique = { technique, avgPercentShift: Math.round(avgPercentShift), count: data.count };
         }
       }
     });
 
     // Find ineffective techniques
     const ineffectiveTechniques = Array.from(techniqueEffectiveness.entries())
-      .filter(([_, data]) => data.count >= 1 && (data.totalShift / data.count) <= 0)
+      .filter(([_, data]) => data.count >= 1 && (data.totalPercentShift / data.count) <= 0)
       .map(([technique, data]) => ({ technique, count: data.count }));
 
     const importantEntries = last7Days.filter(e => 
@@ -120,10 +122,12 @@ export function Insights() {
     let resurfacedInsight = null;
     if (successfulOlderInterventions.length > 0) {
       const randomEntry = successfulOlderInterventions[Math.floor(Math.random() * successfulOlderInterventions.length)];
+      const shift = randomEntry.intervention!.stateBefore! - randomEntry.intervention!.stateAfter!;
+      const percentShift = randomEntry.intervention!.stateBefore! > 0 ? Math.round((shift / randomEntry.intervention!.stateBefore!) * 100) : 0;
       resurfacedInsight = {
         technique: randomEntry.intervention!.technique,
         date: new Date(randomEntry.timestamp),
-        shift: randomEntry.intervention!.stateBefore! - randomEntry.intervention!.stateAfter!
+        percentShift
       };
     }
 
@@ -132,7 +136,7 @@ export function Insights() {
       moodTrend,
       topEmotions,
       topTriggers,
-      avgInterventionShift,
+      avgInterventionPercentShift,
       interventionCount,
       bestTechnique,
       ineffectiveTechniques,
@@ -205,9 +209,9 @@ export function Insights() {
             <Lightbulb className="w-3.5 h-3.5" /> Forward Guidance
           </h3>
           <div className="space-y-6 font-serif text-lg text-ink leading-relaxed">
-            {stats.bestTechnique && Number(stats.bestTechnique.avgShift) > 0 && (
+            {stats.bestTechnique && Number(stats.bestTechnique.avgPercentShift) > 0 && (
               <p>
-                You've found good momentum with <strong className="font-medium">{stats.bestTechnique.technique}</strong> recently (avg {stats.bestTechnique.avgShift} pt shift across {stats.bestTechnique.count} entries). This seems to be a reliable tool for you right now.
+                You've found good momentum with <strong className="font-medium">{stats.bestTechnique.technique}</strong> recently (avg {stats.bestTechnique.avgPercentShift}% reduction in distress across {stats.bestTechnique.count} entries). This seems to be a reliable tool for you right now.
               </p>
             )}
             {stats.ineffectiveTechniques.length > 0 && (
@@ -219,7 +223,7 @@ export function Insights() {
               <div className="pt-6 border-t border-paper-dark flex items-start gap-4">
                 <History className="w-4 h-4 text-ink-light shrink-0 mt-1.5" />
                 <p>
-                  <strong className="font-medium">Looking back:</strong> About {formatDistanceToNow(stats.resurfacedInsight.date)} ago, <strong className="font-medium">{stats.resurfacedInsight.technique}</strong> helped you shift your state by {stats.resurfacedInsight.shift} points. It could be interesting to try it again.
+                  <strong className="font-medium">Looking back:</strong> About {formatDistanceToNow(stats.resurfacedInsight.date)} ago, <strong className="font-medium">{stats.resurfacedInsight.technique}</strong> helped you reduce distress by {stats.resurfacedInsight.percentShift}%. It could be interesting to try it again.
                 </p>
               </div>
             )}
@@ -260,11 +264,11 @@ export function Insights() {
             </div>
           )}
 
-          {stats.avgInterventionShift !== null && (
+          {stats.avgInterventionPercentShift !== null && (
             <div className="flex items-start gap-4 py-4 border-y border-paper-dark">
               <TrendingUp className="w-5 h-5 text-accent-sky shrink-0 mt-0.5" />
               <div className="font-serif text-lg text-ink">
-                Interventions reduced distress by an average of <strong className="font-medium">{stats.avgInterventionShift} points</strong> this week.
+                Interventions reduced distress by an average of <strong className="font-medium">{stats.avgInterventionPercentShift}%</strong> this week.
               </div>
             </div>
           )}
@@ -278,7 +282,7 @@ export function Insights() {
             </div>
           )}
           
-          {stats.topEmotions.length === 0 && stats.topTriggers.length === 0 && stats.avgInterventionShift === null && stats.behaviorCompletionRate === null && (
+          {stats.topEmotions.length === 0 && stats.topTriggers.length === 0 && stats.avgInterventionPercentShift === null && stats.behaviorCompletionRate === null && (
             <div className="font-serif italic text-lg text-ink-light">Not enough structured data yet to identify patterns. Try adding Cognitive Records or Interventions to your entries.</div>
           )}
         </div>

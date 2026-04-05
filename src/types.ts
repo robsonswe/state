@@ -5,9 +5,11 @@ export interface CognitiveRecord {
   thought?: string;
   emotion?: string;
   intensity?: number; // 1-10
+  evidenceFor?: string;
   evidence?: string;
   alternative?: string;
   actStance?: 'resisted' | 'allowed';
+  intensityAfter?: number; // 1-10
   outcome?: string;
 }
 
@@ -24,6 +26,7 @@ export interface BehavioralAction {
   action: string;
   value?: string;
   planned: boolean;
+  scheduledFor?: string;
   completed: boolean;
   stateBefore?: number; // 1-10
   stateAfter?: number; // 1-10
@@ -34,6 +37,7 @@ export interface Entry {
   timestamp: string; // ISO string
   text: string;
   mood?: MoodRating;
+  isPositive?: boolean;
   emotions?: string[];
   tags?: string[];
   isPinned?: boolean;
