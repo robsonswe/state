@@ -14,6 +14,7 @@ interface EntryCardProps {
 export function EntryCard({ entry }: EntryCardProps) {
   const [activeOverlay, setActiveOverlay] = useState<'cognitive' | 'intervention' | 'behavior' | 'link' | null>(null);
   const [showMenu, setShowMenu] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   const deleteEntry = useJournalStore(s => s.deleteEntry);
   const updateEntry = useJournalStore(s => s.updateEntry);
   const entries = useJournalStore(s => s.entries);
@@ -69,21 +70,41 @@ export function EntryCard({ entry }: EntryCardProps) {
         </div>
       </div>
 
-      <div className="absolute top-0 right-0 flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-all">
-        <button 
-          onClick={() => updateEntry(entry.id, { isPinned: !entry.isPinned })}
-          className="p-1.5 text-ink-light hover:text-accent-rust transition-colors"
-          title={entry.isPinned ? "Unpin" : "Pin"}
-        >
-          <Pin className={cn("w-4 h-4", entry.isPinned && "fill-accent-rust text-accent-rust")} />
-        </button>
-        <button 
-          onClick={() => deleteEntry(entry.id)}
-          className="p-1.5 text-ink-light hover:text-accent-rust transition-colors"
-          title="Delete entry"
-        >
-          <Trash2 className="w-4 h-4" />
-        </button>
+      <div className="absolute top-0 right-0 flex items-center gap-2 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-all">
+        {isDeleting ? (
+          <div className="flex items-center gap-2 bg-paper-dim px-2 py-1 rounded border border-accent-rust/20">
+            <span className="text-xs font-medium text-accent-rust uppercase tracking-widest">Delete?</span>
+            <button 
+              onClick={() => deleteEntry(entry.id)}
+              className="text-xs font-medium text-accent-rust hover:text-red-700 px-1"
+            >
+              Yes
+            </button>
+            <button 
+              onClick={() => setIsDeleting(false)}
+              className="text-xs font-medium text-ink-light hover:text-ink px-1"
+            >
+              No
+            </button>
+          </div>
+        ) : (
+          <>
+            <button 
+              onClick={() => updateEntry(entry.id, { isPinned: !entry.isPinned })}
+              className="p-1.5 text-ink-light hover:text-accent-rust transition-colors"
+              title={entry.isPinned ? "Unpin" : "Pin"}
+            >
+              <Pin className={cn("w-4 h-4", entry.isPinned && "fill-accent-rust text-accent-rust")} />
+            </button>
+            <button 
+              onClick={() => setIsDeleting(true)}
+              className="p-1.5 text-ink-light hover:text-accent-rust transition-colors"
+              title="Delete entry"
+            >
+              <Trash2 className="w-4 h-4" />
+            </button>
+          </>
+        )}
       </div>
 
       {entry.text && (

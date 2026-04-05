@@ -171,7 +171,7 @@ export function Insights() {
   const showRecentReflection = recentReflection && isAfter(new Date(recentReflection.timestamp), subDays(new Date(), 7));
 
   return (
-    <div className="max-w-2xl mx-auto px-6 py-12 space-y-16 pb-48">
+    <div className="max-w-2xl mx-auto px-6 py-12 space-y-16 pb-64 sm:pb-72">
       <div>
         <h2 className="font-serif italic text-3xl text-ink mb-2">Weekly Synthesis</h2>
         <p className="text-ink-light font-medium uppercase tracking-widest text-xs">Patterns and reflections from the last 7 days</p>
@@ -207,19 +207,19 @@ export function Insights() {
           <div className="space-y-6 font-serif text-lg text-ink leading-relaxed">
             {stats.bestTechnique && Number(stats.bestTechnique.avgShift) > 0 && (
               <p>
-                <strong className="font-medium">{stats.bestTechnique.technique}</strong> has been highly effective for you recently (avg {stats.bestTechnique.avgShift} pt reduction in distress, based on {stats.bestTechnique.count} entries). Consider using it proactively when you notice early signs of stress.
+                You've found good momentum with <strong className="font-medium">{stats.bestTechnique.technique}</strong> recently (avg {stats.bestTechnique.avgShift} pt shift across {stats.bestTechnique.count} entries). This seems to be a reliable tool for you right now.
               </p>
             )}
             {stats.ineffectiveTechniques.length > 0 && (
               <p>
-                You've tried <strong className="font-medium">{stats.ineffectiveTechniques.map(t => `${t.technique} (${t.count}x)`).join(', ')}</strong> without much relief. It might be worth exploring a different approach or discussing these with a professional.
+                You've been experimenting with <strong className="font-medium">{stats.ineffectiveTechniques.map(t => `${t.technique} (${t.count}x)`).join(', ')}</strong>. Since these haven't shifted your state much recently, you might try a different approach next time to see what resonates better.
               </p>
             )}
             {stats.resurfacedInsight && (
               <div className="pt-6 border-t border-paper-dark flex items-start gap-4">
                 <History className="w-4 h-4 text-ink-light shrink-0 mt-1.5" />
                 <p>
-                  <strong className="font-medium">Past Success:</strong> You used <strong className="font-medium">{stats.resurfacedInsight.technique}</strong> successfully {formatDistanceToNow(stats.resurfacedInsight.date)} ago (reduced distress by {stats.resurfacedInsight.shift} pts). It might be worth revisiting.
+                  <strong className="font-medium">Looking back:</strong> About {formatDistanceToNow(stats.resurfacedInsight.date)} ago, <strong className="font-medium">{stats.resurfacedInsight.technique}</strong> helped you shift your state by {stats.resurfacedInsight.shift} points. It could be interesting to try it again.
                 </p>
               </div>
             )}

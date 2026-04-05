@@ -38,7 +38,7 @@ export function Timeline() {
   }, {});
 
   return (
-    <div className="max-w-2xl mx-auto pb-48">
+    <div className="max-w-2xl mx-auto pb-64 sm:pb-72">
       {/* Refined Search/Filter Bar */}
       <div className="px-6 py-8">
         <div className="flex flex-col sm:flex-row gap-6 items-start sm:items-center justify-between">
@@ -105,8 +105,35 @@ export function Timeline() {
         })}
 
         {filteredEntries.length === 0 && (
-          <div className="flex flex-col items-center justify-center py-24 text-ink-faint font-serif italic text-lg">
-            <p>{entries.length === 0 ? "No entries yet." : "No entries match your search."}</p>
+          <div className="flex flex-col items-center justify-center py-24 text-center">
+            {entries.length === 0 ? (
+              <div className="space-y-6 max-w-md">
+                <h2 className="font-serif text-3xl italic text-ink">Welcome to State</h2>
+                <p className="text-ink-light leading-relaxed">
+                  State is a minimal space to track your mood, thoughts, and actions. 
+                  Start by logging how you feel right now using the composer below.
+                </p>
+                <div className="pt-8 space-y-4 text-left">
+                  <h3 className="text-xs font-medium uppercase tracking-widest text-ink-light">Try writing about:</h3>
+                  <ul className="space-y-3 font-serif text-lg text-ink">
+                    <li className="flex items-start gap-3">
+                      <span className="text-accent-sky mt-1">•</span>
+                      A moment of calm or clarity you experienced today.
+                    </li>
+                    <li className="flex items-start gap-3">
+                      <span className="text-accent-rust mt-1">•</span>
+                      A difficult emotion you're currently navigating.
+                    </li>
+                    <li className="flex items-start gap-3">
+                      <span className="text-accent-sage mt-1">•</span>
+                      An action you took that aligned with your values.
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            ) : (
+              <p className="text-ink-faint font-serif italic text-lg">No entries match your search.</p>
+            )}
           </div>
         )}
       </div>
